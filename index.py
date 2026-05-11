@@ -1,6 +1,9 @@
+from flask import Flask, request, jsonify
 import requests
 import json
 from urllib.parse import unquote
+
+app = Flask(__name__)
 
 
 def get_token():
@@ -25,17 +28,15 @@ def get_token():
         return None, None
 
 
-def handler(request):
+@app.route("/")
+def home():
     uid = request.args.get("uid")
 
     if not uid:
-        return {
-            "statusCode": 200,
-            "body": json.dumps({
-                "status": False,
-                "message": "UID required"
-            })
-        }
+        return jsonify({
+            "status": False,
+            "message": "UID required"
+        })
 
     try:
         token, session = get_token()
@@ -55,22 +56,17 @@ def handler(request):
 
         data = response.json()
 
-        result = {
+        return jsonify({
             "status": True,
             "developer": "@R3XTRON",
             "username": data["unipinRes"]["username"],
             "uid": uid,
             "server": "BGMI",
             "region": "India"
-        }
+        })
 
     except:
-        result = {
+        return jsonify({
             "status": False,
             "message": "Request failed"
-        }
-
-    return {
-        "statusCode": 200,
-        "body": json.dumps(result)
-    }
+        })
